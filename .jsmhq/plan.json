@@ -1,0 +1,113 @@
+{
+  "boards": [
+    {
+      "id": "B1",
+      "title": "Backlog",
+      "status": "active",
+      "order": 0
+    },
+    {
+      "id": "GC",
+      "title": "Graphing Calculator",
+      "status": "active",
+      "order": 1
+    }
+  ],
+  "tasks": [
+    {
+      "id": "GC-T01",
+      "boardId": "GC",
+      "title": "Scaffold calculator UI and project structure",
+      "ownerId": "dwight",
+      "status": "done",
+      "needs": [],
+      "prNumber": null,
+      "description": "STATUS (lead): complete on branch gc-t01-scaffold at aeb878a. This sandbox has no usable GitHub remote/credentials (local-only origin, GH_TOKEN invalid), so no PR can be opened. The branch is the deliverable; the user will merge it from the agent workspace. Do not retry push/PR creation.\n\nBuild the static, no-build foundation for a graphing calculator web app at the repo root. No frameworks, no npm, no build step: plain HTML/CSS/JS loaded with classic <script> tags so index.html works when opened directly from disk.\n\nLayout (desktop side-by-side, stacked on mobile, dark theme):\n- Header: title \"Graphing Calculator\" and an angle-mode toggle (Radians / Degrees).\n- Left column, calculator card: expression display (current expression + result area), text input for expressions, and a keypad: 7-9 ÷, 4-6 ×, 1-3 −, 0 . = +, plus AC, backspace, ( ), ^, and quick keys sin cos tan sqrt pi.\n- Left column, \"Functions\" card: \"f(x) =\" input, \"Plot\" button, empty list container with helper text \"Add a function to plot it.\"\n- Right column, graph card: <canvas>, toolbar (Zoom in, Zoom out, Reset view), and a small coordinate readout element.\n- A status/error line in the calculator card.\n\njs/main.js wires keypad clicks to the expression input (digits/operators/AC/backspace), keyboard typing, and toolbar buttons to graph.zoomIn()/zoomOut()/resetView() only. No math evaluation yet.\n\nCreate working stubs with this exact contract:\n- js/math.js: window.MathEngine = { evaluate(expression, x = 0) { throw new Error('Math engine not implemented'); }, setAngleMode(mode) {}, getAngleMode() { return 'rad'; } }\n- js/graph.js: window.GraphRenderer = { create(canvas, options) { return { render(functions) {}, zoomIn() {}, zoomOut() {}, resetView() {}, getView() { return { xMin: -10, xMax: 10, yMin: -6, yMax: 6 }; } }; } }\n\nCanvas must fill its container. CSS in css/styles.css using CSS variables, responsive at the 900px breakpoint.\n\nFiles: index.html, css/styles.css, js/main.js, js/math.js, js/graph.js",
+      "files": [
+        "index.html",
+        "css/styles.css",
+        "js/main.js",
+        "js/math.js",
+        "js/graph.js"
+      ],
+      "doneWhen": "Opening index.html shows the complete responsive two-column layout; keypad and keyboard edit the expression input; AC/backspace work; toolbar buttons call the graph API; no console errors. Branch + PR.",
+      "note": "GC-T01 scaffold complete on branch gc-t01-scaffold (aeb878a) but cannot open PR: origin remote is missing/local-only (/home/culpe/Programmin/hq-test) and gh auth token invalid."
+    },
+    {
+      "id": "GC-T02",
+      "boardId": "GC",
+      "title": "Implement math expression parser and evaluator",
+      "ownerId": "dwight",
+      "status": "done",
+      "needs": [
+        "GC-T01"
+      ],
+      "prNumber": null,
+      "description": "DELIVERED (lead accepted): branch gc-t02-math at 7ad08b7, stacked on gc-t01-scaffold. Parser/evaluator + tests/math.test.html complete; smoke checks passed. No PR (sandbox has no GitHub remote/credentials).\n\nImplement js/math.js (classic script, replaces the stub) as the math engine. Keep the contract: window.MathEngine with evaluate(expression, x = 0) returning a Number, setAngleMode('rad'|'deg'), getAngleMode().\n\nRequirements:\n- Tokenizer + parser (recursive descent or shunting-yard), no eval()/Function().\n- Numbers incl. decimals and scientific notation; variable x; constants pi/π and e.\n- Unary +/-; binary + - * / ^ with correct precedence; ^ right-associative; parentheses.\n- Implicit multiplication: 2x, 3(x+1), 2sin(x), x(x+1), (x+1)(x-1).\n- Functions: sin, cos, tan, asin, acos, atan, sqrt, abs, ln, log (base 10), exp, floor, ceil, round, min(a,b), max(a,b), pow(a,b). Trig respects angle mode for inputs and inverse outputs.\n- Throw clear Error messages for unknown identifiers, unbalanced parentheses, malformed input, wrong arg counts; suitable for inline UI display.\n- Division by zero may return Infinity (needed for graphing).\n\nTests: create tests/math.test.html + tests/math.test.js loaded with classic script tags; page shows a pass/fail list and a summary. Cover precedence, associativity, unary minus, implicit multiplication, constants, every function, deg/rad, x substitution, and error cases. All tests must pass in the browser.\n\nFiles: js/math.js, tests/math.test.html, tests/math.test.js",
+      "files": [
+        "js/math.js",
+        "tests/math.test.html",
+        "tests/math.test.js"
+      ],
+      "doneWhen": "tests/math.test.html shows all tests passing; MathEngine.evaluate handles 2x^2 + sin(pi/2), 2^3^2 -> 512, sqrt(16)/4 -> 1; friendly errors on 2+, foo(3), (1+2. Branch + PR.",
+      "note": "GC-T02 deliverable (no PR/push possible): branch gc-t02-math @ 7ad08b7 (based on gc-t01-scaffold @ aeb878a). Implements MathEngine parser/evaluator + tests/math.test.html."
+    },
+    {
+      "id": "GC-T03",
+      "boardId": "GC",
+      "title": "Wire calculator evaluation, history, and function list",
+      "ownerId": "dwight",
+      "status": "done",
+      "needs": [
+        "GC-T02"
+      ],
+      "prNumber": null,
+      "description": "DELIVERED (lead accepted): branch gc-t03-calculator at d13db9a, stacked on gc-t02-math. Live preview, =/Enter evaluation, 20-entry history, function list add/hide/delete, angle toggle, toolbar wiring. No PR (sandbox has no GitHub remote/credentials).\n\nImplement the calculator behavior in js/main.js on top of the scaffold UI and MathEngine.\n\n- Live preview: evaluate the current expression with x=0 after a short debounce and show the result; invalid input shows a friendly inline message instead of crashing.\n- Evaluate: = or Enter evaluates and shows the result prominently; AC clears; backspace deletes; keyboard shortcuts work while the expression input is focused.\n- History: keep the last 20 evaluated expressions in a list; clicking an entry restores it to the input. In-memory only.\n- Function plotting: \"Plot\" button (and Enter in the f(x) input) adds { id, expression, color, visible } to the functions array, color from a cycling palette; clear the input; render the list with color swatch, expression, show/hide toggle, delete button; empty state helper text. Call GraphRenderer.create(canvas, { onCursorMove }) once at startup and graph.render(functions) after every add/remove/toggle. Reject empty input; on syntax errors show inline error and do not add.\n- Angle-mode toggle switches MathEngine.setAngleMode and re-renders the graph.\n- Toolbar buttons zoom in/out/reset call the GraphRenderer API.\n\nFiles: js/main.js, index.html, css/styles.css",
+      "files": [
+        "js/main.js",
+        "index.html",
+        "css/styles.css"
+      ],
+      "doneWhen": "Calculator evaluates real expressions with graceful errors; history restores entries; adding/removing/hiding functions updates the list and calls graph.render; angle toggle works; no console errors. Branch + PR.",
+      "note": "GC-T03 deliverable (no PR/push possible): branch gc-t03-calculator @ d13db9a (based on gc-t02-math @ 7ad08b7). Live preview, =/Enter eval, history(20), function list add/hide/delete, angle toggle, toolbar wiring."
+    },
+    {
+      "id": "GC-T04",
+      "boardId": "GC",
+      "title": "Build interactive canvas graphing engine",
+      "ownerId": "dwight",
+      "status": "done",
+      "needs": [
+        "GC-T03"
+      ],
+      "prNumber": null,
+      "description": "DELIVERED (lead accepted): branch gc-t04-graph at 75ed449, stacked on gc-t03-calculator. Real canvas plotter: hi-DPI, adaptive grid/axes + labels, per-pixel sampling, multi-colored function curves, wheel zoom at cursor, drag pan, zoom/reset API, onCursorMove. No PR (sandbox has no GitHub remote/credentials).\n\nImplement js/graph.js (classic script, replaces the stub) as a real function plotter. Keep window.GraphRenderer = { create(canvas, options) } returning { render(functions), zoomIn(), zoomOut(), resetView(), getView() }.\n\n- Hi-DPI canvas sizing; redraw on ResizeObserver and render().\n- Adaptive grid and axes with numeric tick labels and origin; theme-aware colors (match css variables or dark palette).\n- Plot each visible function by sampling MathEngine.evaluate(expression, x) per device-pixel column; break lines on NaN/Infinity; clamp extremes; 1.5–2px colored strokes using function.color; skip invalid expressions quietly.\n- Default view x in [-10, 10], y in [-6, 6]. zoomIn/zoomOut ~1.25x around center; resetView restores default. Wheel zoom around cursor; drag to pan; cursor feedback.\n- Report cursor coordinates through options.onCursorMove({x, y}) for the main UI readout.\n- Redraw via requestAnimationFrame for pan/zoom; support multiple functions.\n\nFiles: js/graph.js, css/styles.css",
+      "files": [
+        "js/graph.js",
+        "css/styles.css"
+      ],
+      "doneWhen": "Multiple expressions plot as correctly colored curves; labeled grid/axes; wheel zoom centered on cursor; drag pan; toolbar zoom/reset works; coordinate readout updates on hover; crisp on resize; no console errors. Branch + PR.",
+      "note": "GC-T04 deliverable (no PR/push possible): branch gc-t04-graph @ 75ed449 (based on gc-t03-calculator @ d13db9a). Real canvas plotter: hi-DPI, adaptive grid/axes+labels, per-pixel sampling, multi-function curves, wheel zoom at cursor, drag pan, zoom/reset API, onCursorMove."
+    },
+    {
+      "id": "GC-T05",
+      "boardId": "GC",
+      "title": "Document usage and final QA polish",
+      "ownerId": "dwight",
+      "status": "done",
+      "needs": [
+        "GC-T04"
+      ],
+      "prNumber": null,
+      "description": "DELIVERED (lead accepted): branch gc-t05-docs at 08de562, stacked on gc-t04-graph. README (features, running, syntax, controls, shortcuts, structure, tests) + QA polish (focus-visible styles, <=480px mobile tweaks). Workspace: /home/culpe/.jsmhq/hq-test/dwight. No PR (sandbox has no GitHub remote/credentials).\n\nWrite README.md documenting the completed app: features, how to run (open index.html directly, or python3 -m http.server 8000), supported operators/constants/functions, degrees/radians, graph controls (wheel, drag, toolbar), keyboard shortcuts, project structure, and how to run tests (open tests/math.test.html).\n\nDo a final QA pass in a browser and fix small issues only: responsive layout at 375px / 768px / 1280px, empty states, focus styles, and a clean console. Do not restructure the app.\n\nFiles: README.md, css/styles.css, index.html, js/main.js",
+      "files": [
+        "README.md",
+        "css/styles.css",
+        "index.html",
+        "js/main.js"
+      ],
+      "doneWhen": "README accurately covers features, running, syntax, controls, structure and tests; app is usable at mobile/tablet/desktop widths with no console errors. Branch + PR.",
+      "note": "GC-T05 deliverable (no PR/push possible): branch gc-t05-docs @ 08de562 (based on gc-t04-graph @ 75ed449). Full README + QA polish (focus-visible styles, <=480px mobile tweaks). Workspace: /home/culpe/.jsmhq/hq-test/dwight — user opens index.html there."
+    }
+  ]
+}
